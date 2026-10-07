@@ -1,0 +1,18 @@
+Distributed Environmental Monitoring System
+- Develop a distributed environmental monitoring system.
+- A DHT22 sensor connected to an Arduino UNO R4 WiFi
+or ESP32 will measure temperature and humidity.
+- The embedded device will publish the measurements 
+over Wi-Fi using MQTT.
+- An existing MQTT broker runs on the RPi and is outside 
+the scope of this project.- A Dockerised Python service 
+running on the RPi will subscribe to the environmental 
+measurements and print the received data to its terminal.
+The embedded application should support both UNO R4 
+WiFi and ESP32 where practical.
+The project should avoid unnecessary duplication 
+between the embedded and Raspberry Pi applications. 
+Configuration, communication definitions and 
+documentation should be shared where sensible.
+Credentials must not be hard-coded into application 
+source code or committed to Git.
