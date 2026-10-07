@@ -1,0 +1,9 @@
+services:
+  subscriber:
+    build:
+      context: ..
+      dockerfile: pi/Dockerfile
+    env_file:
+      - .env
+    network_mode: host
+    restart: unless-stopped

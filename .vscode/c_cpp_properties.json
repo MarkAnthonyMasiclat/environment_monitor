@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "PlatformIO ESP32",
+            "compilerPath": "${env:HOME}/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-g++",
+            "intelliSenseMode": "macos-gcc-x64",
+            "includePath": [
+                "${workspaceFolder}/embedded/include",
+                "${workspaceFolder}/embedded/src",
+                "${workspaceFolder}/embedded/.pio/libdeps/esp32/**",
+                "${env:HOME}/.platformio/packages/framework-arduinoespressif32/**"
+            ],
+            "defines": [
+                "ARDUINO_ESP32_DEV",
+                "ESP32",
+                "ESP_PLATFORM"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
