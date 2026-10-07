@@ -1,4 +1,5 @@
 import json
+import math
 import os
 from pathlib import Path
 from typing import Any
@@ -18,7 +19,17 @@ def parse_reading(payload: bytes, schema_version: int = 1) -> dict[str, Any]:
     message = json.loads(payload.decode("utf-8"))
     if not isinstance(message, dict):
         raise ValueError("payload must be a JSON object")
-    if message.get("schema_version") != schema_version:
+    if set(message) != {
+        "schema_version",
+        "device_id",
+        "temperature_c",
+        "humidity_percent",
+    }:
+        raise ValueError("payload fields do not match the MQTT contract")
+    if (
+        isinstance(message.get("schema_version"), bool)
+        or message.get("schema_version") != schema_version
+    ):
         raise ValueError("unsupported schema_version")
 
     device_id = message.get("device_id")
@@ -26,9 +37,17 @@ def parse_reading(payload: bytes, schema_version: int = 1) -> dict[str, Any]:
     humidity = message.get("humidity_percent")
     if not isinstance(device_id, str) or not device_id:
         raise ValueError("device_id must be a non-empty string")
-    if not isinstance(temperature, (int, float)) or isinstance(temperature, bool):
+    if (
+        not isinstance(temperature, (int, float))
+        or isinstance(temperature, bool)
+        or not math.isfinite(temperature)
+    ):
         raise ValueError("temperature_c must be numeric")
-    if not isinstance(humidity, (int, float)) or isinstance(humidity, bool):
+    if (
+        not isinstance(humidity, (int, float))
+        or isinstance(humidity, bool)
+        or not math.isfinite(humidity)
+    ):
         raise ValueError("humidity_percent must be numeric")
     if not 0 <= humidity <= 100:
         raise ValueError("humidity_percent must be between 0 and 100")

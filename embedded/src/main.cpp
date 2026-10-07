@@ -15,6 +15,21 @@ constexpr int mqttSchemaVersion = 1;
 constexpr char mqttTopicTemplate[] = "environment/v1/%s/measurements";
 constexpr unsigned long publishIntervalMs =
     config::measurementIntervalSeconds * 1000UL;
+
+bool isValidDeviceId() {
+    const size_t deviceIdLength = strlen(config::deviceId);
+    if (deviceIdLength == 0 || deviceIdLength >= 64) {
+        return false;
+    }
+
+    for (size_t index = 0; index < deviceIdLength; ++index) {
+        const char character = config::deviceId[index];
+        if (!(isalnum(character) || character == '-' || character == '_')) {
+            return false;
+        }
+    }
+    return true;
+}
 }
 
 WiFiClient wifiClient;
@@ -72,6 +87,11 @@ void publishReading() {
         return;
     }
 
+    if (!isValidDeviceId()) {
+        Serial.println("Invalid device ID");
+        return;
+    }
+
     const float temperature = dht.readTemperature();
     const float humidity = dht.readHumidity();
     if (isnan(temperature) || isnan(humidity)) {
@@ -80,10 +100,15 @@ void publishReading() {
     }
 
     char topic[128];
-    snprintf(topic, sizeof(topic), mqttTopicTemplate, config::deviceId);
+    const int topicLength = snprintf(
+        topic, sizeof(topic), mqttTopicTemplate, config::deviceId);
+    if (topicLength < 0 || static_cast<size_t>(topicLength) >= sizeof(topic)) {
+        Serial.println("MQTT topic is too long");
+        return;
+    }
 
     char payload[180];
-    snprintf(
+    const int payloadLength = snprintf(
         payload,
         sizeof(payload),
         "{\"schema_version\":%d,\"temperature_c\":%.2f,\"humidity_percent\":%.2f,\"device_id\":\"%s\"}",
@@ -91,6 +116,10 @@ void publishReading() {
         temperature,
         humidity,
         config::deviceId);
+    if (payloadLength < 0 || static_cast<size_t>(payloadLength) >= sizeof(payload)) {
+        Serial.println("MQTT payload is too long");
+        return;
+    }
 
     if (mqttClient.publish(topic, payload)) {
         Serial.print("Published: ");
